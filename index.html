@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1D9E75">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Almoxarifado">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Almoxarifado</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;color:#1a1a1a;background:#f5f5f5;min-height:100vh}
+.app{max-width:480px;margin:0 auto;padding:0 0 80px;min-height:100vh;background:#f5f5f5}
+.topbar{background:#1D9E75;padding:14px 16px 12px;padding-top:max(14px,env(safe-area-inset-top));color:#fff;position:sticky;top:0;z-index:20}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar p{font-size:12px;opacity:.85;margin-top:1px}
+.sync-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 11px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:600}
+.sync-btn i{font-size:15px}
+.nav{display:flex;background:#fff;border-bottom:1px solid #e5e5e5;position:sticky;top:68px;z-index:19;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:1;min-width:56px;padding:10px 2px 8px;border:none;background:transparent;cursor:pointer;font-size:10px;color:#999;display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;transition:color .15s}
+.nav-btn i{font-size:21px}
+.nav-btn.active{color:#1D9E75;border-bottom:2.5px solid #1D9E75}
+.section{display:none;padding:16px}
+.section.active{display:block}
+.card{background:#fff;border:1px solid #ebebeb;border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card-title{font-size:11px;font-weight:700;color:#aaa;margin-bottom:12px;text-transform:uppercase;letter-spacing:.07em}
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.metric{background:#fff;border-radius:12px;padding:14px;border:1px solid #ebebeb;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.metric-label{font-size:12px;color:#999;margin-bottom:4px}
+.metric-value{font-size:28px;font-weight:700}
+.metric-value.alert{color:#D85A30}
+.metric-value.ok{color:#1D9E75}
+label{font-size:13px;color:#666;display:block;margin-bottom:5px;font-weight:500}
+input,select{width:100%;padding:11px 13px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fff;color:#1a1a1a;margin-bottom:12px;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{outline:none;border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+input[readonly]{color:#999;background:#f8f8f8}
+.row2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.btn{display:block;width:100%;padding:13px;border-radius:11px;border:none;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;text-align:center}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-primary{background:#1D9E75;color:#fff}
+.btn-outline{background:#fff;border:1.5px solid #ddd;color:#333}
+.btn-sm{padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid #e5e5e5;background:#fff;cursor:pointer;color:#666;display:inline-flex;align-items:center;gap:3px;transition:background .15s}
+.btn-sm:active{background:#f0f0f0}
+.item-row{display:flex;align-items:flex-start;gap:8px;padding:12px 0;border-bottom:1px solid #f2f2f2}
+.item-row:last-child{border-bottom:none}
+.item-code{font-size:11px;color:#888;background:#f3f3f3;border-radius:5px;padding:2px 7px;white-space:nowrap;font-family:monospace;font-weight:600}
+.item-name{font-size:14px;font-weight:600}
+.item-sub{font-size:12px;color:#aaa;margin-top:2px}
+.badge{font-size:11px;padding:4px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
+.badge-ok{background:#e1f5ee;color:#0a6644}
+.badge-low{background:#fff3ed;color:#b5460f}
+.badge-zero{background:#ffecec;color:#a32d2d}
+.hist-row{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid #f2f2f2}
+.hist-row:last-child{border-bottom:none}
+.hist-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hist-icon.entrada{background:#e1f5ee;color:#0a6644}
+.hist-icon.saida{background:#fff3ed;color:#b5460f}
+.hist-info{flex:1;min-width:0}
+.hist-desc{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:12px;color:#aaa;margin-top:2px}
+.hist-qty{font-size:14px;font-weight:700;white-space:nowrap}
+.hist-qty.entrada{color:#1D9E75}
+.hist-qty.saida{color:#D85A30}
+.empty{text-align:center;padding:32px 0;color:#ccc;font-size:14px}
+.empty i{font-size:40px;display:block;margin-bottom:10px;opacity:.5}
+.alert-banner{background:#fff3ed;border:1px solid #f5c4a0;border-radius:10px;padding:11px 14px;margin-bottom:10px;font-size:13px;color:#8a3a10;display:flex;align-items:center;gap:8px}
+.search-wrap{position:relative;margin-bottom:14px}
+.search-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#bbb;font-size:18px;pointer-events:none}
+.search-wrap input{padding-left:38px;margin-bottom:0}
+.tab-row{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;padding:10px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fff;font-size:13px;cursor:pointer;color:#999;font-weight:600;transition:all .15s}
+.tab.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.msg{font-size:13px;padding:10px 13px;border-radius:9px;margin-bottom:10px;display:none;font-weight:600}
+.msg.ok{background:#e1f5ee;color:#0a6644}
+.msg.err{background:#ffecec;color:#a32d2d}
+.loading{text-align:center;padding:24px;color:#ccc;font-size:14px}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:22px 22px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));width:100%;max-height:92vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:#f0f0f0;border:none;cursor:pointer;color:#555;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.forn-row{display:flex;align-items:flex-start;gap:8px;padding:11px 0;border-bottom:1px solid #f2f2f2}
+.forn-row:last-child{border-bottom:none}
+.forn-name{font-size:14px;font-weight:600;flex:1}
+.forn-sub{font-size:12px;color:#aaa;margin-top:2px}
+.actions-row{display:flex;gap:6px}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23bbb' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.usuario-bar{background:#fff;border-bottom:1px solid #eee;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.usuario-bar label{margin:0;font-size:13px;white-space:nowrap;color:#888}
+.usuario-bar input{margin:0;flex:1;padding:8px 12px;font-size:14px;border-radius:8px}
+.config-box{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px;margin-bottom:14px}
+.config-box p{font-size:13px;color:#78350f;line-height:1.7}
+.config-box strong{color:#451a03}
+.log-row{padding:10px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
+.log-row:last-child{border-bottom:none}
+.log-badge{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700;display:inline-block;margin-bottom:4px}
+.log-EXCLUIR_ITEM,.log-EXCLUIR_FORNECEDOR{background:#ffecec;color:#a32d2d}
+.log-EDITAR_ITEM,.log-EDITAR_FORNECEDOR{background:#fff8e1;color:#7a5000}
+.install-banner{background:#1D9E75;color:#fff;border-radius:14px;padding:14px 16px;margin-bottom:14px;display:none;align-items:center;gap:12px}
+.install-banner.show{display:flex}
+.install-banner p{font-size:13px;flex:1;line-height:1.5}
+.install-banner button{background:#fff;color:#1D9E75;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <h1><i class="ti ti-building-warehouse" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Almoxarifado</h1>
+        <p id="status-txt">Iniciando...</p>
+      </div>
+      <button class="sync-btn" onclick="sincronizar()"><i class="ti ti-refresh" id="sync-icon"></i>Sync</button>
+    </div>
+  </div>
+
+  <div class="usuario-bar">
+    <i class="ti ti-user" style="font-size:18px;color:#bbb"></i>
+    <label>Nome:</label>
+    <input type="text" id="nome-usuario" placeholder="Seu nome completo" oninput="salvarUsuario()">
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goTab('dashboard')" id="nav-dashboard"><i class="ti ti-layout-dashboard"></i>Painel</button>
+    <button class="nav-btn" onclick="goTab('itens')" id="nav-itens"><i class="ti ti-box"></i>Itens</button>
+    <button class="nav-btn" onclick="goTab('movimentar')" id="nav-movimentar"><i class="ti ti-transfer"></i>Mover</button>
+    <button class="nav-btn" onclick="goTab('historico')" id="nav-historico"><i class="ti ti-history"></i>Histórico</button>
+    <button class="nav-btn" onclick="goTab('relatorio')" id="nav-relatorio"><i class="ti ti-chart-bar"></i>Relatório</button>
+    <button class="nav-btn" onclick="goTab('fornecedores')" id="nav-fornecedores"><i class="ti ti-truck"></i>Fornec.</button>
+    <button class="nav-btn" onclick="goTab('auditoria')" id="nav-auditoria"><i class="ti ti-shield-check"></i>Audit.</button>
+    <button class="nav-btn" onclick="goTab('config')" id="nav-config"><i class="ti ti-settings"></i>Config</button>
+  </nav>
+
+  <!-- PAINEL -->
+  <section class="section active" id="sec-dashboard">
+    <div class="install-banner" id="install-banner">
+      <i class="ti ti-download" style="font-size:28px;flex-shrink:0"></i>
+      <p><strong>Instalar como app</strong><br>Adicione à tela inicial para acesso rápido</p>
+      <button onclick="instalarApp()">Instalar</button>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Total de itens</div><div class="metric-value ok" id="m-total">—</div></div>
+      <div class="metric"><div class="metric-label">Alertas mínimo</div><div class="metric-value alert" id="m-alertas">—</div></div>
+      <div class="metric"><div class="metric-label">Entradas hoje</div><div class="metric-value" id="m-entradas">—</div></div>
+      <div class="metric"><div class="metric-label">Saídas hoje</div><div class="metric-value" id="m-saidas">—</div></div>
+    </div>
+    <div id="alert-container"></div>
+    <div class="card"><div class="card-title">Últimas movimentações</div><div id="dash-hist"><div class="loading"><i class="ti ti-refresh spin"></i> Carregando...</div></div></div>
+  </section>
+
+  <!-- ITENS -->
+  <section class="section" id="sec-itens">
+    <div class="search-wrap"><i class="ti ti-search"></i><input type="text" placeholder="Buscar item..." id="search-itens" oninput="renderItens()"></div>
+    <div class="card">
+      <div class="card-title">Cadastrar novo item</div>
+      <div id="msg-item" class="msg"></div>
+      <label>Código</label><input type="text" id="it-codigo" placeholder="Ex: PAR-001">
+      <label>Descrição</label><input type="text" id="it-desc" placeholder="Ex: Parafuso M8 x 25">
+      <label>Unidade</label>
+      <select id="it-unid"><option>UN</option><option>KG</option><option>M</option><option>M²</option><option>L</option><option>PC</option><option>CX</option><option>RL</option><option>PAR</option><option>JG</option></select>
+      <div class="row2">
+        <div><label>Qtd. inicial</label><input type="number" id="it-qtd" value="0" min="0"></div>
+        <div><label>Estoque mínimo</label><input type="number" id="it-min" value="5" min="0"></div>
+      </div>
+      <label>Localização (opcional)</label><input type="text" id="it-local" placeholder="Ex: Prateleira A3">
+      <button class="btn btn-primary" onclick="addItem()"><i class="ti ti-plus" style="vertical-align:-2px;margin-right:4px"></i>Cadastrar item</button>
+    </div>
+    <div class="card"><div class="card-title">Itens cadastrados</div><div id="lista-itens"><div class="loading"><i class="ti ti-refresh spin"></i> Carregando...</div></div></div>
+  </section>
+
+  <!-- MOVIMENTAR -->
+  <section class="section" id="sec-movimentar">
+    <div class="tab-row">
+      <button class="tab active" id="tab-entrada" onclick="switchMov('entrada')"><i class="ti ti-arrow-bar-to-down" style="vertical-align:-2px;margin-right:4px"></i>Entrada</button>
+      <button class="tab" id="tab-saida" onclick="switchMov('saida')"><i class="ti ti-arrow-bar-up" style="vertical-align:-2px;margin-right:4px"></i>Saída / Requisição</button>
+    </div>
+    <div class="card">
+      <div id="msg-mov" class="msg"></div>
+      <label>Item</label><select id="mov-item"><option value="">— Selecione —</option></select>
+      <div class="row2">
+        <div><label>Quantidade</label><input type="number" id="mov-qtd" value="1" min="1"></div>
+        <div><label>Saldo atual</label><input type="text" id="mov-saldo" readonly></div>
+      </div>
+      <label id="mov-ref-label">Fornecedor</label>
+      <select id="mov-forn"><option value="">— Selecione ou deixe em branco —</option></select>
+      <label>Referência (NF, OS, etc.)</label><input type="text" id="mov-ref" placeholder="Ex: NF 12345">
+      <label>Observação</label><input type="text" id="mov-obs" placeholder="Opcional">
+      <button class="btn btn-primary" id="btn-mov" onclick="registrarMov()"><i class="ti ti-check" style="vertical-align:-2px;margin-right:4px"></i>Registrar entrada</button>
+    </div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section class="section" id="sec-historico">
+    <div class="search-wrap"><i class="ti ti-search"></i><input type="text" placeholder="Filtrar por item, usuário..." id="search-hist" oninput="renderHistorico()"></div>
+    <div class="card"><div class="card-title">Todas as movimentações</div><div id="lista-hist"><div class="loading"><i class="ti ti-refresh spin"></i> Carregando...</div></div></div>
+  </section>
+
+  <!-- RELATÓRIO -->
+  <section class="section" id="sec-relatorio">
+    <div class="card">
+      <div class="card-title">Filtrar por período</div>
+      <div class="row2">
+        <div><label>Data início</label><input type="date" id="rel-ini"></div>
+        <div><label>Data fim</label><input type="date" id="rel-fim"></div>
+      </div>
+      <label>Tipo</label>
+      <select id="rel-tipo"><option value="">Todos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option></select>
+      <button class="btn btn-outline" onclick="gerarRelatorio()" style="margin-bottom:10px"><i class="ti ti-search" style="vertical-align:-2px;margin-right:4px"></i>Gerar relatório</button>
+      <button class="btn btn-primary" onclick="exportarExcel()"><i class="ti ti-file-spreadsheet" style="vertical-align:-2px;margin-right:4px"></i>Exportar Excel (.xlsx)</button>
+    </div>
+    <div class="card" id="rel-resultado" style="display:none">
+      <div class="card-title" id="rel-titulo">Resultado</div>
+      <div class="metrics" style="margin-bottom:12px">
+        <div class="metric"><div class="metric-label">Entradas</div><div class="metric-value ok" id="rel-m-ent">0</div></div>
+        <div class="metric"><div class="metric-label">Saídas</div><div class="metric-value alert" id="rel-m-sai">0</div></div>
+      </div>
+      <div id="rel-lista"></div>
+    </div>
+  </section>
+
+  <!-- FORNECEDORES -->
+  <section class="section" id="sec-fornecedores">
+    <div class="card">
+      <div class="card-title">Cadastrar fornecedor</div>
+      <div id="msg-forn" class="msg"></div>
+      <label>Nome / Razão social</label><input type="text" id="forn-nome" placeholder="Ex: Metalúrgica Serra Ltda">
+      <label>CNPJ (opcional)</label><input type="text" id="forn-cnpj" placeholder="00.000.000/0000-00">
+      <label>Contato (opcional)</label><input type="text" id="forn-contato" placeholder="Telefone ou e-mail">
+      <label>Observação (opcional)</label><input type="text" id="forn-obs" placeholder="Ex: Prazo 3 dias">
+      <button class="btn btn-primary" onclick="addForn()"><i class="ti ti-plus" style="vertical-align:-2px;margin-right:4px"></i>Cadastrar fornecedor</button>
+    </div>
+    <div class="card"><div class="card-title">Fornecedores cadastrados</div><div id="lista-forn"><div class="loading"><i class="ti ti-refresh spin"></i> Carregando...</div></div></div>
+  </section>
+
+  <!-- AUDITORIA -->
+  <section class="section" id="sec-auditoria">
+    <div class="card">
+      <div class="card-title">Log de auditoria</div>
+      <p style="font-size:13px;color:#aaa;margin-bottom:12px">Registra todas as edições e exclusões com nome do usuário.</p>
+      <button class="btn btn-outline" onclick="carregarLog()"><i class="ti ti-refresh" style="vertical-align:-2px;margin-right:4px"></i>Atualizar log</button>
+    </div>
+    <div class="card"><div id="lista-log"><div class="empty"><i class="ti ti-shield-check"></i>Clique em "Atualizar log"</div></div></div>
+  </section>
+
+  <!-- CONFIG -->
+  <section class="section" id="sec-config">
+    <div class="config-box">
+      <p><strong>Cole aqui a URL do seu Google Apps Script</strong><br>
+      Você obtém esta URL ao publicar o arquivo Code.gs como Web App no Google Sheets.</p>
+    </div>
+    <div class="card">
+      <label>URL do Apps Script</label>
+      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/..." oninput="salvarConfig()">
+      <button class="btn btn-primary" onclick="testarConexao()"><i class="ti ti-wifi" style="vertical-align:-2px;margin-right:4px"></i>Testar conexão</button>
+      <div id="msg-config" class="msg" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Passo a passo</div>
+      <div style="font-size:13px;color:#666;line-height:2">
+        <p>1. Abra o Google Sheets e crie uma planilha</p>
+        <p>2. Menu <strong>Extensões → Apps Script</strong></p>
+        <p>3. Cole o conteúdo do arquivo <strong>Code.gs</strong></p>
+        <p>4. <strong>Implantar → Nova implantação</strong></p>
+        <p>5. Tipo: <strong>App da Web</strong></p>
+        <p>6. Executar como: <strong>Eu</strong></p>
+        <p>7. Acesso: <strong>Qualquer pessoa</strong></p>
+        <p>8. Copie a URL e cole acima</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL EDITAR ITEM -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">Editar item <button class="modal-close" onclick="fecharModal('modal-edit')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="edit-cod-orig">
+    <label>Código</label><input type="text" id="edit-cod">
+    <label>Descrição</label><input type="text" id="edit-desc">
+    <label>Unidade</label>
+    <select id="edit-unid"><option>UN</option><option>KG</option><option>M</option><option>M²</option><option>L</option><option>PC</option><option>CX</option><option>RL</option><option>PAR</option><option>JG</option></select>
+    <div class="row2">
+      <div><label>Qtd. atual</label><input type="number" id="edit-qtd" min="0"></div>
+      <div><label>Estoque mínimo</label><input type="number" id="edit-min" min="0"></div>
+    </div>
+    <label>Localização</label><input type="text" id="edit-local">
+    <div id="msg-edit" class="msg"></div>
+    <button class="btn btn-primary" onclick="salvarEdit()">Salvar alterações</button>
+  </div>
+</div>
+
+<!-- MODAL EDITAR FORNECEDOR -->
+<div class="modal-overlay" id="modal-forn-edit">
+  <div class="modal">
+    <div class="modal-title">Editar fornecedor <button class="modal-close" onclick="fecharModal('modal-forn-edit')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="ef-id">
+    <label>Nome</label><input type="text" id="ef-nome">
+    <label>CNPJ</label><input type="text" id="ef-cnpj">
+    <label>Contato</label><input type="text" id="ef-contato">
+    <label>Observação</label><input type="text" id="ef-obs">
+    <div id="msg-ef" class="msg"></div>
+    <button class="btn btn-primary" onclick="salvarForn()">Salvar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ---- Estado ----
+let itens=[],historico=[],fornecedores=[],movTipo='entrada';
+let API_URL='',USUARIO='',deferredPrompt=null;
+
+// ---- Init ----
+try{API_URL=localStorage.getItem('alm_url')||'';}catch(e){}
+try{USUARIO=localStorage.getItem('alm_usuario')||'';}catch(e){}
+if(API_URL)document.getElementById('cfg-url').value=API_URL;
+if(USUARIO)document.getElementById('nome-usuario').value=USUARIO;
+
+// Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// PWA Install prompt
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('install-banner').classList.add('show');
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('install-banner').classList.remove('show');
+  deferredPrompt=null;
+});
+
+function instalarApp(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').classList.remove('show');});}
+}
+
+// ---- Helpers ----
+function salvarUsuario(){USUARIO=document.getElementById('nome-usuario').value.trim();try{localStorage.setItem('alm_usuario',USUARIO);}catch(e){}}
+function salvarConfig(){API_URL=document.getElementById('cfg-url').value.trim();try{localStorage.setItem('alm_url',API_URL);}catch(e){}}
+function goTab(t){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('sec-'+t).classList.add('active');document.getElementById('nav-'+t).classList.add('active');}
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+function showMsg(id,txt,tipo){const el=document.getElementById(id);el.textContent=txt;el.className='msg '+tipo;el.style.display='block';setTimeout(()=>el.style.display='none',3500);}
+function setStatus(txt,erro){const el=document.getElementById('status-txt');el.textContent=txt;el.style.color=erro?'#ffcccc':'rgba(255,255,255,.85)';}
+
+// ---- API ----
+async function api(params){
+  if(!API_URL)throw new Error('Configure a URL do Apps Script em Configurações.');
+  const url=API_URL+'?'+new URLSearchParams(params);
+  const res=await fetch(url,{redirect:'follow'});
+  const data=await res.json();
+  if(data.erro)throw new Error(data.erro);
+  return data;
+}
+async function apiPost(body){
+  if(!API_URL)throw new Error('Configure a URL do Apps Script em Configurações.');
+  const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,usuario:USUARIO||'Anônimo'}),redirect:'follow'});
+  const data=await res.json();
+  if(data.erro)throw new Error(data.erro);
+  return data;
+}
+
+// ---- Sync ----
+async function sincronizar(){
+  setStatus('Sincronizando...',false);
+  const icon=document.getElementById('sync-icon');
+  icon.classList.add('spin');
+  try{
+    if(!API_URL){setStatus('Configure a URL em Configurações.',true);icon.classList.remove('spin');return;}
+    const d=await api({action:'getAll'});
+    const norm=(arr,map)=>(arr||[]).map(map);
+    itens=norm(d.itens,i=>({cod:i.Codigo||i.cod,desc:i.Descricao||i.desc,unid:i.Unidade||i.unid,qtd:parseFloat(i.Quantidade||i.qtd)||0,min:parseFloat(i.Estoque_Minimo||i.min)||0,local:i.Localizacao||i.local||''}));
+    historico=norm(d.historico,h=>({tipo:h.Tipo||h.tipo,cod:h.Codigo||h.cod,desc:h.Descricao||h.desc,qtd:h.Quantidade||h.qtd,unid:h.Unidade||h.unid,forn:h.Fornecedor||h.forn||'',ref:h.Referencia||h.ref||'',obs:h.Observacao||h.obs||'',data:h.Data||h.data,hora:h.Hora||h.hora,usuario:h.Usuario||h.usuario||''}));
+    fornecedores=norm(d.fornecedores,f=>({nome:f.Nome||f.nome,cnpj:f.CNPJ||f.cnpj||'',contato:f.Contato||f.contato||'',obs:f.Observacao||f.obs||''}));
+    setStatus('Sincronizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),false);
+    renderDashboard();renderItens();renderMovSelects();renderHistorico();renderFornecedores();
+  }catch(e){setStatus('Erro: '+e.message,true);}
+  icon.classList.remove('spin');
+}
+
+// ---- Dashboard ----
+function renderDashboard(){
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const alertas=itens.filter(i=>i.qtd<=i.min);
+  document.getElementById('m-total').textContent=itens.length;
+  document.getElementById('m-alertas').textContent=alertas.length;
+  document.getElementById('m-entradas').textContent=historico.filter(h=>h.data===hoje&&h.tipo==='entrada').length;
+  document.getElementById('m-saidas').textContent=historico.filter(h=>h.data===hoje&&h.tipo==='saida').length;
+  document.getElementById('alert-container').innerHTML=alertas.map(i=>`<div class="alert-banner"><i class="ti ti-alert-triangle" style="font-size:17px;flex-shrink:0"></i><span><strong>${i.cod}</strong> — ${i.desc}: ${i.qtd} ${i.unid} (mín: ${i.min})</span></div>`).join('');
+  const dh=document.getElementById('dash-hist');
+  dh.innerHTML=historico.length?historico.slice(0,5).map(h=>histRowHtml(h)).join(''):'<div class="empty"><i class="ti ti-history"></i>Sem movimentações</div>';
+}
+
+// ---- Itens ----
+async function addItem(){
+  const cod=document.getElementById('it-codigo').value.trim();
+  const desc=document.getElementById('it-desc').value.trim();
+  if(!cod||!desc)return showMsg('msg-item','Preencha código e descrição.','err');
+  if(!USUARIO)return showMsg('msg-item','Informe seu nome no topo da página.','err');
+  try{showMsg('msg-item','Salvando...','ok');
+    await apiPost({action:'addItem',cod,desc,unid:document.getElementById('it-unid').value,qtd:parseFloat(document.getElementById('it-qtd').value)||0,min:parseFloat(document.getElementById('it-min').value)||0,local:document.getElementById('it-local').value.trim()});
+    showMsg('msg-item',desc+' cadastrado!','ok');
+    ['it-codigo','it-desc','it-local'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('it-qtd').value=0;
+    await sincronizar();
+  }catch(e){showMsg('msg-item',e.message,'err');}
+}
+
+function renderItens(){
+  const q=document.getElementById('search-itens').value.toLowerCase();
+  const f=itens.filter(i=>i.desc.toLowerCase().includes(q)||i.cod.toLowerCase().includes(q));
+  const lista=document.getElementById('lista-itens');
+  if(!f.length){lista.innerHTML='<div class="empty"><i class="ti ti-box"></i>Nenhum item encontrado</div>';return;}
+  lista.innerHTML=f.map(i=>{
+    const badge=i.qtd<=0?'<span class="badge badge-zero">Zerado</span>':i.qtd<=i.min?'<span class="badge badge-low">Abaixo do mín.</span>':'<span class="badge badge-ok">OK</span>';
+    return`<div class="item-row"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap"><span class="item-code">${i.cod}</span><span class="item-name">${i.desc}</span></div><div class="item-sub">${i.qtd} ${i.unid} · Mín: ${i.min}${i.local?' · '+i.local:''}</div></div>${badge}<div class="actions-row"><button onclick="abrirEdit('${i.cod}')" class="btn-sm"><i class="ti ti-edit" style="font-size:15px"></i></button><button onclick="removeItem('${i.cod}')" class="btn-sm"><i class="ti ti-trash" style="font-size:15px"></i></button></div></div>`;
+  }).join('');
+}
+
+async function removeItem(cod){
+  if(!USUARIO)return alert('Informe seu nome antes de excluir.');
+  if(!confirm('Remover item '+cod+'?\nEsta ação ficará no log de auditoria.'))return;
+  try{await apiPost({action:'deleteItem',cod});await sincronizar();}catch(e){alert(e.message);}
+}
+
+function abrirEdit(cod){
+  const i=itens.find(x=>x.cod===cod);if(!i)return;
+  document.getElementById('edit-cod-orig').value=cod;
+  document.getElementById('edit-cod').value=i.cod;
+  document.getElementById('edit-desc').value=i.desc;
+  document.getElementById('edit-unid').value=i.unid;
+  document.getElementById('edit-qtd').value=i.qtd;
+  document.getElementById('edit-min').value=i.min;
+  document.getElementById('edit-local').value=i.local||'';
+  document.getElementById('modal-edit').classList.add('open');
+}
+
+async function salvarEdit(){
+  const codOrig=document.getElementById('edit-cod-orig').value;
+  const cod=document.getElementById('edit-cod').value.trim();
+  const desc=document.getElementById('edit-desc').value.trim();
+  if(!cod||!desc)return showMsg('msg-edit','Preencha código e descrição.','err');
+  if(!USUARIO)return showMsg('msg-edit','Informe seu nome no topo.','err');
+  try{showMsg('msg-edit','Salvando...','ok');
+    await apiPost({action:'editItem',codOrig,cod,desc,unid:document.getElementById('edit-unid').value,qtd:parseFloat(document.getElementById('edit-qtd').value)||0,min:parseFloat(document.getElementById('edit-min').value)||0,local:document.getElementById('edit-local').value.trim()});
+    fecharModal('modal-edit');await sincronizar();
+  }catch(e){showMsg('msg-edit',e.message,'err');}
+}
+
+// ---- Movimentar ----
+function switchMov(tipo){
+  movTipo=tipo;
+  document.getElementById('tab-entrada').classList.toggle('active',tipo==='entrada');
+  document.getElementById('tab-saida').classList.toggle('active',tipo==='saida');
+  document.getElementById('mov-ref-label').textContent=tipo==='entrada'?'Fornecedor':'Solicitante / Setor';
+  document.getElementById('btn-mov').innerHTML='<i class="ti ti-check" style="vertical-align:-2px;margin-right:4px"></i>Registrar '+tipo;
+  atualizarSaldo();
+}
+
+function renderMovSelects(){
+  const sel=document.getElementById('mov-item');const cur=sel.value;
+  sel.innerHTML='<option value="">— Selecione —</option>'+itens.map(i=>`<option value="${i.cod}">${i.cod} — ${i.desc}</option>`).join('');
+  sel.value=cur;
+  const sf=document.getElementById('mov-forn');
+  sf.innerHTML='<option value="">— Selecione ou deixe em branco —</option>'+fornecedores.map(f=>`<option value="${f.nome}">${f.nome}</option>`).join('');
+  atualizarSaldo();
+}
+
+function atualizarSaldo(){
+  const item=itens.find(i=>i.cod===document.getElementById('mov-item').value);
+  document.getElementById('mov-saldo').value=item?item.qtd+' '+item.unid:'—';
+}
+
+async function registrarMov(){
+  const cod=document.getElementById('mov-item').value;
+  const qtd=parseFloat(document.getElementById('mov-qtd').value);
+  if(!cod)return showMsg('msg-mov','Selecione um item.','err');
+  if(!qtd||qtd<=0)return showMsg('msg-mov','Informe uma quantidade válida.','err');
+  if(!USUARIO)return showMsg('msg-mov','Informe seu nome no topo da página.','err');
+  const item=itens.find(i=>i.cod===cod);if(!item)return;
+  try{showMsg('msg-mov','Registrando...','ok');
+    await apiPost({action:'registrarMov',tipo:movTipo,cod,desc:item.desc,qtd,unid:item.unid,forn:document.getElementById('mov-forn').value,ref:document.getElementById('mov-ref').value.trim(),obs:document.getElementById('mov-obs').value.trim()});
+    showMsg('msg-mov',(movTipo==='entrada'?'Entrada':'Saída')+' registrada!','ok');
+    document.getElementById('mov-qtd').value=1;
+    ['mov-ref','mov-obs'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mov-forn').value='';
+    await sincronizar();
+  }catch(e){showMsg('msg-mov',e.message,'err');}
+}
+
+// ---- Histórico ----
+function histRowHtml(h){
+  const meta=[h.data,h.hora,h.usuario,h.forn,h.ref,h.obs].filter(Boolean).join(' · ');
+  return`<div class="hist-row"><div class="hist-icon ${h.tipo}"><i class="ti ti-arrow-${h.tipo==='entrada'?'bar-to-down':'bar-up'}" style="font-size:17px"></i></div><div class="hist-info"><div class="hist-desc">${h.cod} — ${h.desc}</div><div class="hist-meta">${meta}</div></div><div class="hist-qty ${h.tipo}">${h.tipo==='entrada'?'+':'-'}${h.qtd} ${h.unid}</div></div>`;
+}
+
+function renderHistorico(){
+  const q=document.getElementById('search-hist').value.toLowerCase();
+  const f=historico.filter(h=>(h.desc||'').toLowerCase().includes(q)||(h.cod||'').toLowerCase().includes(q)||(h.usuario||'').toLowerCase().includes(q)||(h.forn||'').toLowerCase().includes(q));
+  document.getElementById('lista-hist').innerHTML=f.length?f.slice(0,80).map(h=>histRowHtml(h)).join(''):'<div class="empty"><i class="ti ti-history"></i>Nenhuma movimentação</div>';
+}
+
+// ---- Relatório ----
+function parseDateBR(str){const p=(str||'').split('/');if(p.length!==3)return null;return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
+
+function gerarRelatorio(){
+  const ini=document.getElementById('rel-ini').value;
+  const fim=document.getElementById('rel-fim').value;
+  const tipo=document.getElementById('rel-tipo').value;
+  let f=[...historico];
+  if(ini){const d=new Date(ini);f=f.filter(h=>{const hd=parseDateBR(h.data);return hd&&hd>=d;});}
+  if(fim){const d=new Date(fim);d.setHours(23,59,59);f=f.filter(h=>{const hd=parseDateBR(h.data);return hd&&hd<=d;});}
+  if(tipo)f=f.filter(h=>h.tipo===tipo);
+  document.getElementById('rel-m-ent').textContent=f.filter(h=>h.tipo==='entrada').length;
+  document.getElementById('rel-m-sai').textContent=f.filter(h=>h.tipo==='saida').length;
+  document.getElementById('rel-titulo').textContent=f.length+' registro(s) encontrado(s)';
+  document.getElementById('rel-lista').innerHTML=f.length?f.slice(0,100).map(h=>histRowHtml(h)).join(''):'<div class="empty" style="padding:16px 0"><i class="ti ti-search"></i>Nenhum registro no período</div>';
+  document.getElementById('rel-resultado').style.display='block';
+  window._relFiltrado=f;
+}
+
+function exportarExcel(){
+  const dados=window._relFiltrado||historico;
+  if(!dados.length){alert('Nenhuma movimentação para exportar.');return;}
+  const ws1=[['Data','Hora','Tipo','Código','Descrição','Qtd','Unidade','Fornecedor/Solicitante','Referência','Observação','Usuário']];
+  dados.forEach(h=>ws1.push([h.data,h.hora,h.tipo==='entrada'?'Entrada':'Saída',h.cod,h.desc,h.qtd,h.unid,h.forn||'',h.ref||'',h.obs||'',h.usuario||'']));
+  const ws2=[['Código','Descrição','Unidade','Saldo Atual','Estoque Mínimo','Status','Localização']];
+  itens.forEach(i=>ws2.push([i.cod,i.desc,i.unid,i.qtd,i.min,i.qtd<=0?'Zerado':i.qtd<=i.min?'Abaixo do mínimo':'OK',i.local||'']));
+  const wb=XLSX.utils.book_new();
+  const s1=XLSX.utils.aoa_to_sheet(ws1);const s2=XLSX.utils.aoa_to_sheet(ws2);
+  s1['!cols']=[{wch:12},{wch:8},{wch:10},{wch:12},{wch:30},{wch:8},{wch:8},{wch:25},{wch:20},{wch:25},{wch:20}];
+  s2['!cols']=[{wch:12},{wch:30},{wch:8},{wch:12},{wch:15},{wch:18},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,s1,'Movimentações');XLSX.utils.book_append_sheet(wb,s2,'Saldo Atual');
+  XLSX.writeFile(wb,'almoxarifado_'+new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')+'.xlsx');
+}
+
+// ---- Fornecedores ----
+async function addForn(){
+  const nome=document.getElementById('forn-nome').value.trim();
+  if(!nome)return showMsg('msg-forn','Informe o nome.','err');
+  if(!USUARIO)return showMsg('msg-forn','Informe seu nome no topo.','err');
+  try{showMsg('msg-forn','Salvando...','ok');
+    await apiPost({action:'addFornecedor',nome,cnpj:document.getElementById('forn-cnpj').value.trim(),contato:document.getElementById('forn-contato').value.trim(),obs:document.getElementById('forn-obs').value.trim()});
+    showMsg('msg-forn',nome+' cadastrado!','ok');
+    ['forn-nome','forn-cnpj','forn-contato','forn-obs'].forEach(id=>document.getElementById(id).value='');
+    await sincronizar();
+  }catch(e){showMsg('msg-forn',e.message,'err');}
+}
+
+function renderFornecedores(){
+  const lista=document.getElementById('lista-forn');
+  if(!fornecedores.length){lista.innerHTML='<div class="empty"><i class="ti ti-truck"></i>Nenhum fornecedor ainda</div>';return;}
+  lista.innerHTML=fornecedores.map(f=>`<div class="forn-row"><div style="flex:1;min-width:0"><div class="forn-name">${f.nome}</div><div class="forn-sub">${[f.cnpj,f.contato,f.obs].filter(Boolean).join(' · ')||'Sem detalhes'}</div></div><div class="actions-row"><button onclick="abrirEditForn('${(f.nome||'').replace(/'/g,"\\'")}')" class="btn-sm"><i class="ti ti-edit" style="font-size:15px"></i></button><button onclick="removeForn('${(f.nome||'').replace(/'/g,"\\'")}')" class="btn-sm"><i class="ti ti-trash" style="font-size:15px"></i></button></div></div>`).join('');
+}
+
+async function removeForn(nome){
+  if(!USUARIO)return alert('Informe seu nome antes de excluir.');
+  if(!confirm('Remover '+nome+'?\nEsta ação ficará no log.'))return;
+  try{await apiPost({action:'deleteFornecedor',nome});await sincronizar();}catch(e){alert(e.message);}
+}
+
+function abrirEditForn(nome){
+  const f=fornecedores.find(x=>x.nome===nome);if(!f)return;
+  document.getElementById('ef-id').value=nome;document.getElementById('ef-nome').value=f.nome;
+  document.getElementById('ef-cnpj').value=f.cnpj||'';document.getElementById('ef-contato').value=f.contato||'';document.getElementById('ef-obs').value=f.obs||'';
+  document.getElementById('modal-forn-edit').classList.add('open');
+}
+
+async function salvarForn(){
+  const nomeOrig=document.getElementById('ef-id').value;
+  const nome=document.getElementById('ef-nome').value.trim();
+  if(!nome)return showMsg('msg-ef','Informe o nome.','err');
+  if(!USUARIO)return showMsg('msg-ef','Informe seu nome no topo.','err');
+  try{await apiPost({action:'editFornecedor',nomeOrig,nome,cnpj:document.getElementById('ef-cnpj').value.trim(),contato:document.getElementById('ef-contato').value.trim(),obs:document.getElementById('ef-obs').value.trim()});fecharModal('modal-forn-edit');await sincronizar();}catch(e){showMsg('msg-ef',e.message,'err');}
+}
+
+// ---- Auditoria ----
+async function carregarLog(){
+  const lista=document.getElementById('lista-log');
+  lista.innerHTML='<div class="loading"><i class="ti ti-refresh spin"></i> Carregando...</div>';
+  try{
+    const d=await api({action:'getLog'});
+    const log=(d.log||[]).reverse();
+    if(!log.length){lista.innerHTML='<div class="empty"><i class="ti ti-shield-check"></i>Nenhum evento registrado</div>';return;}
+    lista.innerHTML=log.slice(0,100).map(l=>{
+      const acao=l.Acao||l.acao||'';
+      return`<div class="log-row"><span class="log-badge log-${acao}">${acao.replace(/_/g,' ')}</span><div style="font-weight:600">${l.Usuario||l.usuario||'—'}</div><div style="font-size:12px;color:#aaa">${l.Data||''} ${l.Hora||''} · ${l.Detalhes||''}</div></div>`;
+    }).join('');
+  }catch(e){lista.innerHTML='<div class="empty"><i class="ti ti-alert-triangle"></i>'+e.message+'</div>';}
+}
+
+// ---- Config ----
+async function testarConexao(){
+  API_URL=document.getElementById('cfg-url').value.trim();
+  try{localStorage.setItem('alm_url',API_URL);}catch(e){}
+  try{showMsg('msg-config','Testando...','ok');await api({action:'getAll'});showMsg('msg-config','✓ Conexão OK! Sincronizando...','ok');await sincronizar();}
+  catch(e){showMsg('msg-config','Erro: '+e.message,'err');}
+}
+
+document.getElementById('mov-item').addEventListener('change',atualizarSaldo);
+sincronizar();
+</script>
+</body>
+</html>
