@@ -1,19 +1,8 @@
-const CACHE = 'almoxarifado-v2';
-
-self.addEventListener('install', e => {
-  self.skipWaiting();
-});
-
+self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => caches.delete(k)))
-    )
-  );
+  e.waitUntil(caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))));
   self.clients.claim();
 });
-
 self.addEventListener('fetch', e => {
-  // Sempre busca da rede primeiro, sem cache
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  e.respondWith(fetch(e.request));
 });
